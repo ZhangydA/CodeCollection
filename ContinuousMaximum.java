@@ -1,3 +1,8 @@
+/**
+ * @Date 2018-03-27
+ * @author ZhangydA
+ * @SAU
+ */
 public class ContinuousMaximum {
 	public int continuousMaxinum(int arr[]){
 		int counter = 0;

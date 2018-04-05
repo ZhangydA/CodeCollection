@@ -1,0 +1,113 @@
+#include <stdio.h>
+#include <malloc.h>
+#define maxm 10000 /// 最多的节点的个数
+#define maxn 26    ///一个节点最多有26个孩子节点
+#include <iostream>
+using namespace std;
+
+int cnt;
+
+struct Node {
+    int level;
+    char ch;
+    Node *parent;
+    Node *child[maxn];
+};
+#define LEN sizeof(Node)
+
+struct Dnode{
+    int level;
+    char ch;
+}node[maxm];
+
+Node *CreatMForkTree(int n){
+    int i,j;
+    Node *root,*p,*q;
+    if (n < 1) return NULL;
+
+    root = (Node *)malloc(LEN);
+    root->level = node[0].level;
+    root->ch = node[0].ch;
+
+    for (i = 0;i < maxn;i++)
+        root->child[i] = NULL;
+    root->parent = NULL;
+
+    p = root;
+    for(i = 1;i < n;i++){
+        q = (Node *)malloc(LEN);
+        q->level = node[i].level;
+        q->ch = node[i].ch;
+
+        for (j = 0;j < maxn;j++)
+            q->child[j] = NULL;
+
+
+        while (q->level <= p->level)
+            p = p->parent;
+        q->parent = p;
+
+        j = -1;
+        while (1){
+            if (p->child[++j] == NULL && j < n){
+                p->child[j] = q;
+                break;
+            }
+        }
+        p = q;
+    }
+    return root;
+}
+
+///后续遍历，用栈实现
+Node *stack[maxm];
+void postOrder(Node *root,int n){
+    int falg = 0;
+    printf ("输出非递归形式的后序遍历:\n");
+    Node *p;
+    int vis[maxm];
+    int top = -1,i;
+    stack[++top] = root;
+    vis[top] = 0;
+    while (top >= 0){
+        p = stack[top];
+
+        if (vis[top] == 0 && p->child[0] != NULL){
+            vis[top] = 1;
+            for (i = maxn - 1;i >= 0;i --){
+                if (p->child[i] != NULL){
+                    stack[++top] = p->child[i];
+                    vis[top] = 0;
+                }
+            }
+        }
+        if (stack[top]->child[0] == NULL || vis[top] == 1){
+
+            printf ("%c",stack[top--]->ch);
+        }
+    }
+    printf ("\n\n");
+}
+
+void Free(int n){
+    for (int i = 0;i < n;i++)
+        free(stack[i]);
+}
+
+int main(){
+    int n,i;
+    int kcase = 1;
+    printf("Case %d:\n输入结点的个数:\n",kcase);
+    while (scanf ("%d",&n) == 1 && n){
+        char left,right,comma;
+        printf ("按照 \"(层号,元素)\" 形式输入所有的节点:\n");
+        for (i = 0;i < n;i++){
+            getchar();
+            scanf("%c%d%c%c%c",&left,&(node[i].level),&comma,&(node[i].ch),&right);
+        }
+        Node *root = CreatMForkTree(n);
+        postOrder(root,n);
+        printf("Case %d:\n输入结点的个数:\n",++kcase);
+    }
+    return 0;
+ }

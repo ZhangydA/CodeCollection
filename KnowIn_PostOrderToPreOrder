@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int maxn = 50 + 5;
+int pre[maxn],mid[maxn];///前序 和 中序
+struct Node{
+    int left,right;
+}node[maxn];
+
+int n;///节点的总个数
+
+///la ra 代表中序的变量  lb rb 代表前序
+int built(int la,int ra,int lb,int rb){
+    if (la > ra) return 0;
+    int rt = pre[lb];
+    int p1,p2;
+    p1 = la;
+    while (mid[p1] != rt) p1 ++;
+    p2 = p1 - la; ///代表的是左子树中节点的个数
+    ///创建左子树
+    node[rt].left = built(la,p1 - 1,lb + 1,lb + p2);
+    ///创建右子树
+    node[rt].right = built(p1 + 1,ra,lb + p2 + 1,rb);
+    return rt;
+}
+
+void PostOrder(int root){
+    if (node[root].left != 0) PostOrder(node[root].left);
+    if (node[root].right != 0) PostOrder(node[root].right);
+    cout << root << " ";
+}
+
+int main(){
+    scanf ("%d",&n);
+    for (int i = 0;i < n;i ++)
+        scanf ("%d",&mid[i]);
+    for (int i = 0;i < n;i ++)
+        scanf ("%d",&pre[i]);
+    built(0,n - 1,0,n - 1);
+    PostOrder(pre[0]);
+    return 0;
+}
+知道后序和中序求后序
+源代码：
+#include <bits/stdc++.h>
+using namespace std;
+const int maxn=50;
+
+int mid[maxn],be[maxn];  ///分别是中序和后续数组
+struct Node{
+    int left,right;
+}node[maxn];
+int n;
+
+int build(int la,int ra,int lb,int rb){///la,ra表示中序遍历  lb,rb表示后序遍历
+    if(la > ra)  return 0;
+    int rt = be[rb], p1 , p2;  ///be[rb] 指的是根节点
+    ///在中序遍历中找到根节点
+    p1 = la;
+    while(mid[p1] != rt)  p1 ++; ///当 while 循环之后 p1 所指的就是根节点的位置
+    p2 = p1 - la; /// p2 的到的是所有的左子树中节点个数
+    node[rt].left = build(la , p1 - 1 , lb , lb + p2 - 1); /// 循环递归左子树，找出每棵子树的根节点
+    node[rt].right = build(p1 + 1,ra,lb + p2,rb - 1);  ///同理右子树
+    return rt; ///根节点的位置
+}
+
+void PreOrder(int root){
+    printf ("%d ",root);
+    if (node[root].left != 0) PreOrder(node[root].left);
+    if (node[root].right != 0) PreOrder(node[root].right);
+}
+
+int main(){
+    int i,j;
+    cin>>n;
+    for(i=0;i<n;i++)
+        scanf("%d",&be[i]);
+    for(i=0;i<n;i++)
+        scanf("%d",&mid[i]);
+    build(0,n - 1,0,n - 1);
+    int root = be[n-1];
+    PreOrder(root);
+    return 0;
+}

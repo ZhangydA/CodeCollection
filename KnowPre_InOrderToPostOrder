@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int maxn = 50 + 5;
+int pre[maxn],mid[maxn];///前序 和 中序
+struct Node{
+    int left,right;
+}node[maxn];
+
+int n;///节点的总个数
+
+///la ra 代表中序的变量  lb rb 代表前序
+int built(int la,int ra,int lb,int rb){
+    if (la > ra) return 0;
+    int rt = pre[lb];
+    int p1,p2;
+    p1 = la;
+    while (mid[p1] != rt) p1 ++;
+    p2 = p1 - la; ///代表的是左子树中节点的个数
+    ///创建左子树
+    node[rt].left = built(la,p1 - 1,lb + 1,lb + p2);
+    ///创建右子树
+    node[rt].right = built(p1 + 1,ra,lb + p2 + 1,rb);
+    return rt;
+}
+
+void PostOrder(int root){
+    if (node[root].left != 0) PostOrder(node[root].left);
+    if (node[root].right != 0) PostOrder(node[root].right);
+    cout << root << " ";
+}
+
+int main(){
+    scanf ("%d",&n);
+    for (int i = 0;i < n;i ++)
+        scanf ("%d",&mid[i]);
+    for (int i = 0;i < n;i ++)
+        scanf ("%d",&pre[i]);
+    built(0,n - 1,0,n - 1);
+    PostOrder(pre[0]);
+    return 0;
+}

@@ -1,0 +1,130 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int maxn = 50;
+
+map< string,vector<string> >NFA;
+vector<string>DFA[maxn];
+map<string,char>mp; ///重名的使用
+set<char>A; /// 表示给了一个 a 后的状态
+set<char>B; /// 表示给了一个 b 后的状态
+int cnt = 0; ///表示第cnt个重命名
+set<string>st1; ///检查是否出现重复的    NO
+queue<string>Q; ///保证顺序
+
+void Read_NFA(){
+    string str,a,b;
+    while (true){
+        cin >> str >> a >> b;
+        vector<string>vec;
+        vec.push_back(a);
+        vec.push_back(b);
+        NFA["{" + str + "}"] = vec;
+        if (str == "f") break;
+    }
+}
+
+string getString(set<char> &S,int t,char temp){
+    ///cout << "输出集合的大小" << " " << S.size() << endl;
+    string result;
+    string ch = "{ }";
+    ch[1] = temp;
+    string buf = NFA[ch][t];
+    int flag = 0;
+    if (buf == "{NULL}") return "";
+    for(int j = 1;j <= buf.size() - 2;j ++){
+        if (buf[j] == ',') continue;
+        if (!S.count(buf[j])){
+            S.insert(buf[j]);
+            if (flag == 0){
+                result.push_back(buf[j]);
+                flag = 1;
+            } else {
+                result.push_back(',');
+                result.push_back(buf[j]);
+            }
+        }
+    }
+    return result;
+}
+
+void IsInQueue(string str){
+    if (!st1.count(str) && str != "{NULL}" && str != "{}"){
+        st1.insert(str);
+        ///cout << "进入队列" << " " << str << endl;
+        Q.push(str);
+    }
+}
+
+void ConvetToDFA(){
+    ///初始状态
+    string str = "{0}";
+    Q.push(str); st1.insert(str);
+    while (!Q.empty()){ ///进入队列中的一定是没有出现过的
+        string temp = Q.front();  Q.pop();
+        ///cout << "temp = " << temp << endl;
+        string a = "{",b = "{",ming;
+        mp[temp] = 'A' + cnt;
+        ///为字符串进行重命名
+        DFA[cnt].push_back(temp);
+        ming.push_back('A' + cnt);
+        DFA[cnt].push_back(ming);
+        ///如果内部只有一个元素说明在NFA中已经包含直接放进去即可
+        if (NFA.count(temp)) {
+            a = NFA[temp][0];
+            b = NFA[temp][1];
+            DFA[cnt].push_back(a);
+            DFA[cnt].push_back(b);
+            IsInQueue(a);
+            IsInQueue(b);
+        } else {
+            A.clear(); B.clear();
+            int flaga = 0,flagb = 0;
+            for (int i = 1;i <= temp.size() - 2;i ++){
+                if (temp[i] == ',') continue;
+                string a1 = getString(A,0,temp[i]);
+                if (a1 != ""){
+                    if (flaga == 0) flaga = 1;
+                    else a.push_back(',');
+                }
+                a += a1;
+                string a2 = getString(B,1,temp[i]);
+                if (a2 != ""){
+                    if (flagb == 0) flagb = 1;
+                    else b.push_back(',');
+                }
+                b += a2;
+            }
+            a += "}"; b += "}";
+            DFA[cnt].push_back(a);
+            DFA[cnt].push_back(b);
+            IsInQueue(a);
+            IsInQueue(b);
+        }
+        cnt ++;
+    }
+}
+
+void Print(){
+    for (int i = 0;i < cnt;i ++){
+        for (int j = 0;j < DFA[i].size();j ++){
+            if(j > 1){
+                if (mp.count(DFA[i][j])) cout << mp[DFA[i][j]];
+            } else cout << DFA[i][j];
+        }
+        cout << endl;
+    }
+}
+
+int main(){
+    Read_NFA();
+    ConvetToDFA();
+    Print();
+    return 0;
+}
+
+/**
+0 {1} {0,1}
+1 {2} {NULL}
+2 {2,f} {f}
+f {NULL} {NULL}
+*/
